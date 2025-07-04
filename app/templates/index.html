@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitHub Events Feed</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h2>Live GitHub Activity</h2>
+  <div id="feed"></div>
+
+  <script>
+    async function fetchEvents() {
+      const res = await fetch('/poll');
+      const data = await res.json();
+      const feed = document.getElementById("feed");
+      feed.innerHTML = "";
+      data.forEach(ev => {
+        let msg = "";
+        if (ev.action === "PUSH")
+          msg = `"${ev.author}" pushed to "${ev.to_branch}" on ${ev.timestamp}`;
+        else if (ev.action === "PULL_REQUEST")
+          msg = `"${ev.author}" submitted a pull request from "${ev.from_branch}" to "${ev.to_branch}" on ${ev.timestamp}`;
+        else if (ev.action === "MERGE")
+          msg = `"${ev.author}" merged branch "${ev.from_branch}" to "${ev.to_branch}" on ${ev.timestamp}`;
+        const div = document.createElement("div");
+        div.className = "event";
+        div.innerText = msg;
+        feed.appendChild(div);
+      });
+    }
+
+    fetchEvents();
+    setInterval(fetchEvents, 15000);
+  </script>
+</body>
+</html>
